@@ -48,7 +48,7 @@ public class ClientHistoryService implements IHistoryService {
         if (response.statusCode() == 201) {
             System.out.println("[Proxy] History successfully saved");
         } else {
-            System.err.println("[Proxy] Server error" + response.statusCode());
+            System.err.println("[Proxy] Server error: " + response.statusCode());
         }
     }
 

@@ -1,7 +1,10 @@
 package com.edu.web.browserapp;
 
-import com.edu.web.browserapp.service.IHistoryService;
-import com.edu.web.browserapp.service.impl.ClientHistoryService;
+import com.edu.web.browserapp.requestHandle.IRequestHandler;
+import com.edu.web.browserapp.requestHandle.RequestContext;
+import com.edu.web.browserapp.requestHandle.handler.HistoryRequestHandler;
+import com.edu.web.browserapp.requestHandle.handler.NetworkHandler;
+import com.edu.web.browserapp.requestHandle.handler.SomeOtherRequestHandler;
 import javafx.application.Application;
 import javafx.concurrent.Worker;
 import javafx.geometry.Insets;
@@ -20,15 +23,16 @@ public class BrowserApp extends Application {
     private WebView webView;
     private TextField addressBar;
     private Label statusLabel;
-    private IHistoryService historyService;
+    private IRequestHandler loadPipeline;
 
     @Override
     public void start(Stage stage) {
-        historyService = ClientHistoryService.getInstance();
 
         webView = new WebView();
         addressBar = new TextField("https://www.google.com");
         statusLabel = new Label("Готовий");
+
+        buildLoadPipeline();
 
         addressBar.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ENTER) {
@@ -37,14 +41,12 @@ public class BrowserApp extends Application {
         });
 
 
-        webView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+        webView.getEngine().getLoadWorker().stateProperty().addListener((_, _, newState) -> {
             statusLabel.setText(newState.toString());
 
             if (newState == Worker.State.SUCCEEDED) {
                 String loadedUrl = webView.getEngine().getLocation();
                 statusLabel.setText("Завантажено: " + loadedUrl);
-
-                historyService.saveToHistory(loadedUrl);
             }
         });
 
@@ -67,9 +69,23 @@ public class BrowserApp extends Application {
     }
 
     private void loadPage(String url) {
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        if (!url.startsWith("https://")) {
             url = "https://" + url;
         }
-        webView.getEngine().load(url);
+
+        var requestContext = new RequestContext(webView, url);
+
+        loadPipeline.handle(requestContext);
+    }
+
+    private void buildLoadPipeline() {
+        IRequestHandler historyHandler = new HistoryRequestHandler();
+        IRequestHandler someOtherHandler = new SomeOtherRequestHandler();
+        IRequestHandler networkHandler = new NetworkHandler();
+
+        historyHandler.setNext(someOtherHandler)
+                .setNext(networkHandler);
+
+        loadPipeline = historyHandler;
     }
 }
