@@ -6,9 +6,19 @@ import com.edu.web.restservicewebbrowser.domain.resource.Resource;
 public class CssResourceFactory extends ResourceFactory {
 
     @Override
-    protected Resource createResource(String url, byte[] rawData) {
-        String cssContent = new String(rawData);
+    protected boolean isValidUrl(String url) {
+        return url.endsWith(".css");
+    }
 
-        return new CssResource(url, cssContent);
+    @Override
+    protected byte[] postProcessData(byte[] data) {
+        System.out.println(" -> [CSS] Виконую мініфікацію CSS-коду (видалення пробілів)...");
+        String content = new String(data);
+        return (content + " [MINIFIED]").getBytes();
+    }
+
+    @Override
+    protected Resource createResource(String url, byte[] rawData) {
+        return new CssResource(url, new String(rawData));
     }
 }

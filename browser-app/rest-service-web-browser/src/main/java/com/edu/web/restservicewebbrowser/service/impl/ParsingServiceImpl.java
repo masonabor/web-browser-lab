@@ -71,7 +71,7 @@ public class ParsingServiceImpl implements ParsingService {
                 return;
             }
 
-            Resource resource = factory.fetchAndPackageResource(url);
+            Resource resource = factory.processResource(url);
 
             resourceService.saveResource(resource, webPageId);
 

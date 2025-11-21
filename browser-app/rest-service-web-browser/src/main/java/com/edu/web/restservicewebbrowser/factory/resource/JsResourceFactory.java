@@ -6,9 +6,13 @@ import com.edu.web.restservicewebbrowser.domain.resource.Resource;
 public class JsResourceFactory extends ResourceFactory {
 
     @Override
-    protected Resource createResource(String url, byte[] rawData) {
-        String jsContent = new String(rawData);
+    protected byte[] postProcessData(byte[] data) {
+        System.out.println(" -> [JS] Перевірка скрипта на віруси...");
+        return data;
+    }
 
-        return new JsResource(url, jsContent);
+    @Override
+    protected Resource createResource(String url, byte[] rawData) {
+        return new JsResource(url, new String(rawData));
     }
 }

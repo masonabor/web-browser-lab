@@ -1,25 +1,36 @@
 package com.edu.web.restservicewebbrowser.factory.resource;
 
-
 import com.edu.web.restservicewebbrowser.domain.resource.Resource;
-
 
 public abstract class ResourceFactory {
 
-    protected abstract Resource createResource(String url, byte[] rawData);
+    public final Resource processResource(String url) {
+        System.out.println("\n[Template Method] Початок обробки: " + url);
 
-    public Resource fetchAndPackageResource(String url) {
+        if (!isValidUrl(url)) {
+            throw new IllegalArgumentException("Невалідний URL або тип файлу: " + url);
+        }
+
         byte[] rawData = downloadFromUrl(url);
 
-        Resource resource = createResource(url, rawData);
+        byte[] processedData = postProcessData(rawData);
 
-        System.out.println("Фабрика " + this.getClass().getSimpleName() + " створила: " + resource.toString());
+        Resource resource = createResource(url, processedData);
+
+        System.out.println("[Template Method] Ресурс успішно створено.");
         return resource;
     }
 
-    private byte[] downloadFromUrl(String url) {
-        System.out.println("Завантаження даних з " + url + "...");
-        // додати реальний виклик http
-        return ("(сирі байти для " + url + ")").getBytes();
+    protected boolean isValidUrl(String url) {
+        return true;
     }
+
+    private byte[] downloadFromUrl(String url) {
+        System.out.println(" -> Завантаження байтів з мережі...");
+        return ("Content of " + url).getBytes();
+    }
+
+    protected abstract byte[] postProcessData(byte[] data);
+
+    protected abstract Resource createResource(String url, byte[] data);
 }
