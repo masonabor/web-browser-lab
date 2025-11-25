@@ -11,7 +11,7 @@ import java.sql.PreparedStatement;
 public class ResourceSaveVisitor implements IResourceVisitor {
 
     private Connection connection;
-    private int webPageId; // ID сторінки, до якої прив'язаний ресурс
+    private int webPageId;
 
     public ResourceSaveVisitor(Connection connection, int webPageId) {
         this.connection = connection;
